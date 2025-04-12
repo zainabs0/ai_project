@@ -11,6 +11,10 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
+type ChatRequest struct {
+	Message string `json:"message"`
+}
+
 func main() {
 	// Get OpenAI API key from environment variable
 	apiKey := os.Getenv("OPENAI_API_KEY")
@@ -23,7 +27,28 @@ func main() {
 
 	// Create HTTP handler
 	http.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
-		// Make a test call to OpenAI
+		// Enable CORS
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		if r.Method != "POST" {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		var chatReq ChatRequest
+		if err := json.NewDecoder(r.Body).Decode(&chatReq); err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		// Make a call to OpenAI
 		resp, err := client.CreateChatCompletion(
 			context.Background(),
 			openai.ChatCompletionRequest{
@@ -31,7 +56,7 @@ func main() {
 				Messages: []openai.ChatCompletionMessage{
 					{
 						Role:    openai.ChatMessageRoleUser,
-						Content: "Hello! This is a test message.",
+						Content: chatReq.Message,
 					},
 				},
 			},
