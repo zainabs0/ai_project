@@ -1,10 +1,13 @@
 # AI Chatbot Application
 
-A simple chat application with a React frontend and Go backend that integrates with the OpenAI API.
+A simple chat application with a React frontend and C++ backend that integrates with the OpenAI API.
 
 ## Prerequisites
 
-- Go 1.16 or higher
+- C++17 compatible compiler (gcc 8+, clang 7+, MSVC 2019+)
+- CMake 3.10 or higher
+- libcurl
+- OpenSSL
 - Node.js 16 or higher
 - npm or yarn
 - OpenAI API key
@@ -26,9 +29,32 @@ echo "OPENAI_API_KEY=your-api-key-here" > .env
 echo "PORT=8080" >> .env
 ```
 
-3. Install Go dependencies:
+3. Install dependencies:
 ```bash
-go mod download
+# Create dependencies directory
+mkdir -p deps
+cd deps
+
+# Clone required dependencies
+git clone https://github.com/yhirose/cpp-httplib.git
+git clone https://github.com/nlohmann/json.git
+
+# Install system dependencies (Ubuntu/Debian)
+sudo apt-get install libcurl4-openssl-dev libssl-dev
+
+# Install system dependencies (macOS)
+brew install curl openssl
+```
+
+4. Build the backend:
+```bash
+# Create build directory
+mkdir build
+cd build
+
+# Configure and build
+cmake ..
+make
 ```
 
 ### Frontend Setup
@@ -47,9 +73,9 @@ npm install
 
 ### Start the Backend
 
-1. In the root directory, run:
+1. In the build directory, run:
 ```bash
-go run main.go
+./ai_chatbot_backend
 ```
 
 The backend server will start on port 8080 (or the port specified in your .env file).
@@ -97,3 +123,7 @@ If you encounter any issues:
 3. Verify that the frontend is making requests to the correct backend URL
 4. Check the browser's developer console for any frontend errors
 5. Check the terminal running the backend for any server errors
+6. For C++ build issues:
+   - Ensure all dependencies are properly installed
+   - Check that CMake can find all required libraries
+   - Verify your compiler supports C++17
